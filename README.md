@@ -6,6 +6,8 @@ A visual developer tool that transforms GitHub repositories into interactive 2.5
 
 ![GitHub Visualizer Demo](./docs/screenshots/hero.png)
 
+[**🌐 Live Demo**](https://github-visualizer-olive.vercel.app/) &nbsp;&nbsp; [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FVeerpratapsingh08%2FGithub-Visualizer&root-directory=github-visualizer)
+
 ---
 
 ## What This Does
@@ -29,7 +31,7 @@ A built-in terminal simulator where you can practice Git commands and see the co
 |-------------------|----------------------|
 | ![Treemap](./docs/screenshots/treemap.png) | ![Terminal](./docs/screenshots/terminal.png) |
 
-> Replace these with actual screenshots before release
+
 
 ---
 

@@ -31,7 +31,7 @@
 
 ## Priority Actions
 
-1. ⚡ Add live demo link
+1. ✅ Add live demo link
 2. ⚡ Add hero GIF/video to README
 3. ⚡ Improve rate limit error messaging
 4. 📌 Add basic smoke tests
