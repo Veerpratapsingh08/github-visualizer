@@ -13,7 +13,7 @@ export default function Home() {
       {/* Top Navigation */}
       <header className="flex items-center justify-between border-b border-white/5 px-6 py-4 md:px-10 lg:px-40 bg-background/80 backdrop-blur-md sticky top-0 z-50">
         <div className="flex items-center gap-3 text-white">
-          <Image src="/logo.png?v=2" alt="GitHub Visualizer" width={36} height={36} className="rounded-lg" />
+          <Image src="/logo.png" alt="GitHub Visualizer" width={36} height={36} className="rounded-lg" unoptimized />
           <h2 className="text-white text-xl font-bold leading-tight">GitHub Visualizer</h2>
         </div>
         <div className="flex flex-1 justify-end gap-8">
@@ -82,7 +82,7 @@ export default function Home() {
                  {/* Central Logo */}
                  <div className="z-10 text-center p-8 backdrop-blur-sm bg-black/40 rounded-xl border border-white/10 flex flex-col items-center">
                     <div className="relative mb-4">
-                        <Image src="/logo.png?v=2" alt="GitHub Visualizer" width={96} height={96} className="animate-[float_4s_ease-in-out_infinite]" />
+                        <Image src="/logo.png" alt="GitHub Visualizer" width={96} height={96} className="animate-[float_4s_ease-in-out_infinite]" unoptimized />
                         <div className="absolute inset-0 blur-xl bg-primary/30 rounded-full animate-pulse -z-10"></div>
                     </div>
                     <p className="text-blue-100 font-mono text-sm tracking-wider">READY_TO_EXPLORE</p>
