@@ -1,156 +1,225 @@
 import { RepoFile } from "./Fetcher";
 
-export type CityNode = {
+export type TreemapNode = {
   name: string;
   path: string;
   type: "file" | "folder";
   size: number;
   depth: number;
-  children: CityNode[];
-  // Layout properties
+  children: TreemapNode[];
+  // Layout properties (set by squarify algorithm)
   x: number;
-  z: number;
+  y: number;
   width: number;
-  depthSize: number; // along Z axis
+  height: number;
   color: string;
 };
 
+// Vibrant color palette for file types
 const EXTENSION_COLORS: Record<string, string> = {
   ts: "#3178c6",
   tsx: "#3178c6",
-  js: "#f7df1e",
-  jsx: "#f7df1e",
+  js: "#f0db4f",
+  jsx: "#61dafb",
   css: "#264de4",
+  scss: "#cc6699",
   html: "#e34c26",
-  json: "#ffffff",
-  md: "#000000",
-  png: "#ff00ff",
-  svg: "#ff9900",
-  other: "#888888"
+  json: "#cbcb41",
+  md: "#083fa1",
+  yml: "#cb171e",
+  yaml: "#cb171e",
+  py: "#3776ab",
+  go: "#00add8",
+  rs: "#dea584",
+  java: "#b07219",
+  rb: "#cc342d",
+  php: "#777bb4",
+  swift: "#ffac45",
+  kt: "#a97bff",
+  c: "#555555",
+  cpp: "#f34b7d",
+  h: "#555555",
+  sh: "#89e051",
+  sql: "#e38c00",
+  graphql: "#e535ab",
+  vue: "#41b883",
+  svelte: "#ff3e00",
+  png: "#a855f7",
+  jpg: "#a855f7",
+  jpeg: "#a855f7",
+  gif: "#a855f7",
+  svg: "#ffb13b",
+  ico: "#a855f7",
+  woff: "#ec4899",
+  woff2: "#ec4899",
+  ttf: "#ec4899",
+  eot: "#ec4899",
+  lock: "#6b7280",
+  gitignore: "#f05032",
+  env: "#ecd53f",
+  other: "#6b7280"
 };
 
-const getExtension = (path: string) => {
-    const parts = path.split('.');
-    return parts.length > 1 ? parts[parts.length - 1] : 'other';
+const getExtension = (path: string): string => {
+  const filename = path.split('/').pop() || '';
+  if (filename.startsWith('.')) return filename.slice(1); // .gitignore -> gitignore
+  const parts = filename.split('.');
+  return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : 'other';
 };
 
-const getColor = (path: string) => {
-    return EXTENSION_COLORS[getExtension(path)] || EXTENSION_COLORS.other;
+const getColor = (path: string): string => {
+  const ext = getExtension(path);
+  return EXTENSION_COLORS[ext] || EXTENSION_COLORS.other;
 };
 
-// Basic Treemap-like Layout Algorithm (Simplified squarified or just grid)
-// For "Code City", folders contain files. We want to pack them.
-// Let's build the tree first.
-export const buildCityTree = (files: RepoFile[]): CityNode => {
-    const root: CityNode = {
-        name: "root",
-        path: "",
-        type: "folder",
-        size: 0,
-        depth: 0,
-        children: [],
-        x: 0, z: 0, width: 0, depthSize: 0, color: "#222"
-    };
+// Squarified Treemap Algorithm
+// Based on: https://www.win.tue.nl/~vanwijk/stm.pdf
+const squarify = (
+  children: TreemapNode[],
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  totalSize: number
+) => {
+  if (children.length === 0) return;
+  if (children.length === 1) {
+    const child = children[0];
+    child.x = x;
+    child.y = y;
+    child.width = width;
+    child.height = height;
+    return;
+  }
 
-    const map: Record<string, CityNode> = { "": root };
-
-    // 1. Build Hierarchy
-    files.forEach(file => {
-        const parts = file.path.split('/');
-        let currentPath = "";
-        
-        parts.forEach((part, i) => {
-            const isFile = i === parts.length - 1 && file.type === "blob";
-            const parentPath = currentPath;
-            currentPath = currentPath ? `${currentPath}/${part}` : part;
-
-            if (!map[currentPath]) {
-                const node: CityNode = {
-                    name: part,
-                    path: currentPath,
-                    type: isFile ? "file" : "folder",
-                    size: isFile ? (file.size || 100) : 0, 
-                    depth: i + 1,
-                    children: [],
-                    x: 0, z: 0, width: 0, depthSize: 0,
-                    color: isFile ? getColor(currentPath) : "#333" 
-                };
-                map[currentPath] = node;
-                if (map[parentPath]) {
-                    map[parentPath].children.push(node);
-                    // Add size up? 
-                }
-            }
-        });
-    });
-    // 1.5 Sort Children (Folders first, then Files by size descending)
-    const sortNodes = (node: CityNode) => {
-        if (node.children.length > 0) {
-            node.children.sort((a, b) => {
-                if (a.type !== b.type) {
-                    return a.type === "folder" ? -1 : 1; // Folders first
-                }
-                return b.size - a.size; // Size descending
-            });
-            node.children.forEach(sortNodes);
-        }
-    };
-
-    // 2. Propagate Size (Sum of file sizes)
-    const propagateSize = (node: CityNode): number => {
-        if (node.type === "file") return Math.max(node.size, 100); // Min size
-        const total = node.children.reduce((acc, child) => acc + propagateSize(child), 0);
-        node.size = total;
-        return total;
-    };
-    propagateSize(root);
-    sortNodes(root);
-
-    // 3. Compute Layout (Recursive packing)
-    // We'll map 'size' to 'area'. sqrt(size) -> side length approx.
-    // For a city, we want to lay out children on a 2D plane (x, z) within the parent's generic bounds.
-    // Simple Packing: Place in a grid or spiral.
+  // Sort by size descending for better squarification
+  const sorted = [...children].sort((a, b) => b.size - a.size);
+  
+  // Simple slice-and-dice with alternating horizontal/vertical splits
+  let currentX = x;
+  let currentY = y;
+  const isHorizontal = width >= height;
+  
+  sorted.forEach((child) => {
+    const ratio = child.size / totalSize;
     
-    const layout = (node: CityNode, x: number, z: number) => {
-        node.x = x;
-        node.z = z;
-        
-        if (node.type === "file") {
-            // Building dimensions
-            // Height usually = lines of code ~ size
-            // Width/Depth fixed or related to sqrt(size)?
-            // Let's make "Land area" fixed-ish for visibility, Height dynamic
-            const scale = Math.log2(node.size + 1); // Log scale for height
-            node.width = 10;
-            node.depthSize = 10;
-            return;
-        }
-
-        // Folder: Pack children
-        // Simple Grid Packing
-        // Calculate grid size needed
-        const childCount = node.children.length;
-        const cols = Math.ceil(Math.sqrt(childCount));
-        const padding = 5;
-        const cellSize = 15; // Assumption: children distinct enough
-        
-        // This is a placeholder layout. Real treemaps are harder.
-        // We'll just list them in a grid for V1.
-        
-        node.children.forEach((child, i) => {
-            const col = i % cols;
-            const row = Math.floor(i / cols);
-            const childX = x + col * (cellSize + padding);
-            const childZ = z + row * (cellSize + padding);
-            
-            layout(child, childX, childZ);
-        });
-        
-        node.width = cols * (cellSize + padding);
-        node.depthSize = Math.ceil(childCount / cols) * (cellSize + padding);
-    };
-
-    layout(root, 0, 0);
-
-    return root;
+    if (isHorizontal) {
+      const childWidth = width * ratio;
+      child.x = currentX;
+      child.y = y;
+      child.width = Math.max(childWidth, 1);
+      child.height = height;
+      currentX += childWidth;
+    } else {
+      const childHeight = height * ratio;
+      child.x = x;
+      child.y = currentY;
+      child.width = width;
+      child.height = Math.max(childHeight, 1);
+      currentY += childHeight;
+    }
+  });
 };
+
+// Build tree from flat file list
+export const buildTreemap = (files: RepoFile[]): TreemapNode => {
+  const root: TreemapNode = {
+    name: "root",
+    path: "",
+    type: "folder",
+    size: 0,
+    depth: 0,
+    children: [],
+    x: 0,
+    y: 0,
+    width: 100,
+    height: 100,
+    color: "#1e293b"
+  };
+
+  const map: Record<string, TreemapNode> = { "": root };
+
+  // Build hierarchy
+  files.forEach(file => {
+    const parts = file.path.split('/');
+    let currentPath = "";
+    
+    parts.forEach((part, i) => {
+      const isFile = i === parts.length - 1 && file.type === "blob";
+      const parentPath = currentPath;
+      currentPath = currentPath ? `${currentPath}/${part}` : part;
+
+      if (!map[currentPath]) {
+        const node: TreemapNode = {
+          name: part,
+          path: currentPath,
+          type: isFile ? "file" : "folder",
+          size: isFile ? Math.max(file.size || 100, 50) : 0,
+          depth: i + 1,
+          children: [],
+          x: 0,
+          y: 0,
+          width: 0,
+          height: 0,
+          color: isFile ? getColor(currentPath) : "#1e293b"
+        };
+        map[currentPath] = node;
+        if (map[parentPath]) {
+          map[parentPath].children.push(node);
+        }
+      }
+    });
+  });
+
+  // Propagate sizes up
+  const propagateSize = (node: TreemapNode): number => {
+    if (node.type === "file") return node.size;
+    const total = node.children.reduce((acc, child) => acc + propagateSize(child), 0);
+    node.size = Math.max(total, 1);
+    return node.size;
+  };
+  propagateSize(root);
+
+  // Apply treemap layout recursively
+  const layoutTreemap = (
+    node: TreemapNode,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  ) => {
+    node.x = x;
+    node.y = y;
+    node.width = width;
+    node.height = height;
+
+    if (node.type === "file" || node.children.length === 0) return;
+
+    // Add padding for nested folders
+    const padding = node.depth === 0 ? 0 : 2;
+    const innerX = x + padding;
+    const innerY = y + padding;
+    const innerWidth = Math.max(width - padding * 2, 1);
+    const innerHeight = Math.max(height - padding * 2, 1);
+
+    // Layout children using squarify
+    squarify(node.children, innerX, innerY, innerWidth, innerHeight, node.size);
+
+    // Recursively layout grandchildren
+    node.children.forEach(child => {
+      if (child.type === "folder") {
+        layoutTreemap(child, child.x, child.y, child.width, child.height);
+      }
+    });
+  };
+
+  // Start with a fixed-size canvas
+  const canvasSize = 200;
+  layoutTreemap(root, 0, 0, canvasSize, canvasSize);
+
+  return root;
+};
+
+// Legacy export for compatibility
+export type CityNode = TreemapNode;
+export const buildCityTree = buildTreemap;
