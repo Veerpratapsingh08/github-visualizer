@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import clsx from "clsx";
 import { ChevronDown } from "lucide-react";
 
-// Git course structure based on W3Schools Git Tutorial
 type Command = {
   command: string;
   description: string;

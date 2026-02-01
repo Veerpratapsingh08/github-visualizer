@@ -81,9 +81,9 @@ export default function Home() {
 
         <div className="w-full max-w-[1200px] grid grid-cols-1 md:grid-cols-3 gap-6 pb-20">
             {[
-                { icon: "view_in_ar", title: "3D Repository View", desc: "Navigate your file structure like a city map. Identify large files and complex dependencies instantly." },
-                { icon: "history", title: "Time Travel", desc: "Scrub through commit history to see how your project evolved over time visually." },
-                { icon: "analytics", title: "Code Insights", desc: "Heatmaps for code churn, contributors activity, and complexity metrics overlaid on 3D blocks." }
+                { icon: "grid_view", title: "Treemap Visualization", desc: "See your entire repository as an interactive 2.5D heatmap. File size determines block height, colors indicate file types." },
+                { icon: "school", title: "Interactive Git Learning", desc: "Master Git commands with a hands-on terminal simulator. Practice branching, merging, and more with visual feedback." },
+                { icon: "palette", title: "Language Detection", desc: "Instantly identify file types with color-coded blocks. TypeScript, JavaScript, CSS, Python, and 30+ languages supported." }
             ].map((f, i) => (
                 <div key={i} className="flex flex-col gap-3 p-6 rounded-2xl bg-secondary/30 border border-white/5 hover:border-primary/50 hover:bg-secondary/50 transition-all group">
                     <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-2 group-hover:bg-primary group-hover:text-white transition-colors box-shadow-glow">

@@ -7,7 +7,6 @@ export type TreemapNode = {
   size: number;
   depth: number;
   children: TreemapNode[];
-  // Layout properties (set by squarify algorithm)
   x: number;
   y: number;
   width: number;
@@ -15,7 +14,6 @@ export type TreemapNode = {
   color: string;
 };
 
-// Vibrant color palette for file types
 const EXTENSION_COLORS: Record<string, string> = {
   ts: "#3178c6",
   tsx: "#3178c6",
@@ -62,7 +60,7 @@ const EXTENSION_COLORS: Record<string, string> = {
 
 const getExtension = (path: string): string => {
   const filename = path.split('/').pop() || '';
-  if (filename.startsWith('.')) return filename.slice(1); // .gitignore -> gitignore
+  if (filename.startsWith('.')) return filename.slice(1);
   const parts = filename.split('.');
   return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : 'other';
 };
@@ -72,8 +70,6 @@ const getColor = (path: string): string => {
   return EXTENSION_COLORS[ext] || EXTENSION_COLORS.other;
 };
 
-// Squarified Treemap Algorithm
-// Based on: https://www.win.tue.nl/~vanwijk/stm.pdf
 const squarify = (
   children: TreemapNode[],
   x: number,
@@ -92,10 +88,8 @@ const squarify = (
     return;
   }
 
-  // Sort by size descending for better squarification
   const sorted = [...children].sort((a, b) => b.size - a.size);
   
-  // Simple slice-and-dice with alternating horizontal/vertical splits
   let currentX = x;
   let currentY = y;
   const isHorizontal = width >= height;
@@ -121,7 +115,6 @@ const squarify = (
   });
 };
 
-// Build tree from flat file list
 export const buildTreemap = (files: RepoFile[]): TreemapNode => {
   const root: TreemapNode = {
     name: "root",
@@ -139,7 +132,6 @@ export const buildTreemap = (files: RepoFile[]): TreemapNode => {
 
   const map: Record<string, TreemapNode> = { "": root };
 
-  // Build hierarchy
   files.forEach(file => {
     const parts = file.path.split('/');
     let currentPath = "";
@@ -171,7 +163,6 @@ export const buildTreemap = (files: RepoFile[]): TreemapNode => {
     });
   });
 
-  // Propagate sizes up
   const propagateSize = (node: TreemapNode): number => {
     if (node.type === "file") return node.size;
     const total = node.children.reduce((acc, child) => acc + propagateSize(child), 0);
@@ -180,7 +171,6 @@ export const buildTreemap = (files: RepoFile[]): TreemapNode => {
   };
   propagateSize(root);
 
-  // Apply treemap layout recursively
   const layoutTreemap = (
     node: TreemapNode,
     x: number,
@@ -195,17 +185,14 @@ export const buildTreemap = (files: RepoFile[]): TreemapNode => {
 
     if (node.type === "file" || node.children.length === 0) return;
 
-    // Add padding for nested folders
     const padding = node.depth === 0 ? 0 : 2;
     const innerX = x + padding;
     const innerY = y + padding;
     const innerWidth = Math.max(width - padding * 2, 1);
     const innerHeight = Math.max(height - padding * 2, 1);
 
-    // Layout children using squarify
     squarify(node.children, innerX, innerY, innerWidth, innerHeight, node.size);
 
-    // Recursively layout grandchildren
     node.children.forEach(child => {
       if (child.type === "folder") {
         layoutTreemap(child, child.x, child.y, child.width, child.height);
@@ -213,13 +200,11 @@ export const buildTreemap = (files: RepoFile[]): TreemapNode => {
     });
   };
 
-  // Start with a fixed-size canvas
   const canvasSize = 200;
   layoutTreemap(root, 0, 0, canvasSize, canvasSize);
 
   return root;
 };
 
-// Legacy export for compatibility
 export type CityNode = TreemapNode;
 export const buildCityTree = buildTreemap;

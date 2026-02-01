@@ -1,36 +1,151 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GitHub Visualizer
 
-## Getting Started
+**See your code. Understand your structure.**
 
-First, run the development server:
+A visual developer tool that transforms GitHub repositories into interactive 2.5D treemaps and teaches Git through a hands-on terminal simulator.
+
+![GitHub Visualizer Demo](./docs/screenshots/hero.png)
+
+---
+
+## What This Does
+
+### 🗺️ Repository Visualization
+Paste any public GitHub URL and watch it transform into a treemap where:
+- **Block height** = file size
+- **Block color** = file type (TypeScript is blue, CSS is purple, etc.)
+- **Nested rectangles** = folder hierarchy
+
+Hover over any block to see file details. Drag to orbit. Scroll to zoom.
+
+### 🎓 Interactive Git Learning
+A built-in terminal simulator where you can practice Git commands and see the commit graph update in real-time. No risk of breaking anything—it's all simulated.
+
+---
+
+## Screenshots
+
+| Repository Treemap | Git Learning Terminal |
+|-------------------|----------------------|
+| ![Treemap](./docs/screenshots/treemap.png) | ![Terminal](./docs/screenshots/terminal.png) |
+
+> Replace these with actual screenshots before release
+
+---
+
+## Philosophy
+
+This project believes in:
+
+- **Visual understanding over raw metrics** — A picture of your codebase tells you more than LOC counts
+- **Minimal UI, maximum clarity** — Hide controls until needed, let the visualization speak
+- **Learning by interaction** — Type commands, see results, build intuition
+- **Exploration over instruction** — No tutorials, just tools to discover
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Framework | Next.js 16 (App Router) |
+| 3D Rendering | Three.js + React Three Fiber |
+| Styling | Tailwind CSS |
+| Language | TypeScript |
+| API | GitHub REST API (unauthenticated) |
+
+---
+
+## Local Setup
 
 ```bash
+# Clone the repository
+git clone https://github.com/Veerpratapsingh08/Github-Visualizer.git
+cd Github-Visualizer/github-visualizer
+
+# Install dependencies
+npm install
+
+# Start development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Requirements
+- Node.js 18+
+- npm 9+
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Non-Goals
 
-To learn more about Next.js, take a look at the following resources:
+Things this project intentionally does not do:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **No authentication** — We use GitHub's public API only
+- **No private repos** — By design, to keep it simple
+- **No backend** — Everything runs client-side
+- **No analytics/tracking** — Your data stays in your browser
+- **No historical analysis** — We show current state, not trends
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Known Limitations
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Rate limiting**: GitHub's unauthenticated API allows ~60 requests/hour. Large repos may hit this.
+- **Large repos**: Repositories with 10,000+ files may be slow to render.
+- **Mobile**: The 3D view isn't optimized for touch devices yet.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Roadmap
+
+### Now
+- [x] Treemap visualization
+- [x] File type color coding
+- [x] Interactive Git terminal
+- [x] Commit graph visualization
+
+### Next
+- [ ] GitHub OAuth for higher rate limits
+- [ ] Search/filter files in visualization
+- [ ] Export visualization as image
+- [ ] Keyboard navigation
+
+### Later
+- [ ] Compare two branches visually
+- [ ] Private repository support
+- [ ] VS Code extension
+
+---
+
+## Contributing
+
+We welcome contributions! See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
+
+**Good first issues** are labeled `good-first-issue` — these are ideal for newcomers.
+
+### Quick Contribution Ideas
+- Add support for a new file type color
+- Improve mobile responsiveness
+- Add a new Git command to the simulator
+- Fix a typo in the UI
+
+---
+
+## License
+
+MIT License — see [LICENSE](./LICENSE) for details.
+
+---
+
+## Author
+
+**Veer Pratap Singh**  
+[Portfolio](https://veerpratapsingh.vercel.app) · [GitHub](https://github.com/Veerpratapsingh08)
+
+---
+
+<p align="center">
+  Made with ❤️ for developers who think visually
+</p>
