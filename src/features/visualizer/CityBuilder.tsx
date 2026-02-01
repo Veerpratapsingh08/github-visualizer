@@ -83,6 +83,18 @@ export const buildCityTree = (files: RepoFile[]): CityNode => {
             }
         });
     });
+    // 1.5 Sort Children (Folders first, then Files by size descending)
+    const sortNodes = (node: CityNode) => {
+        if (node.children.length > 0) {
+            node.children.sort((a, b) => {
+                if (a.type !== b.type) {
+                    return a.type === "folder" ? -1 : 1; // Folders first
+                }
+                return b.size - a.size; // Size descending
+            });
+            node.children.forEach(sortNodes);
+        }
+    };
 
     // 2. Propagate Size (Sum of file sizes)
     const propagateSize = (node: CityNode): number => {
@@ -92,6 +104,7 @@ export const buildCityTree = (files: RepoFile[]): CityNode => {
         return total;
     };
     propagateSize(root);
+    sortNodes(root);
 
     // 3. Compute Layout (Recursive packing)
     // We'll map 'size' to 'area'. sqrt(size) -> side length approx.

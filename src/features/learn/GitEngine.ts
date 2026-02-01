@@ -15,6 +15,7 @@ export type GitState = {
   currentBranch: string;
   staging: string[]; // List of files staged
   workingDirectory: string[]; // List of modified files (simulated)
+  isInitialized: boolean; // Whether git init has been run
 };
 
 type GitActions = {
@@ -37,7 +38,8 @@ export const useGitStore = create<GitState & GitActions>((set, get) => ({
   branches: {},
   currentBranch: 'main',
   staging: [],
-  workingDirectory: ['file1.txt', 'style.css'], // Simulating some uncommited work
+  workingDirectory: [],
+  isInitialized: false,
 
   init: () => {
     set({
@@ -47,6 +49,7 @@ export const useGitStore = create<GitState & GitActions>((set, get) => ({
       currentBranch: 'main',
       staging: [],
       workingDirectory: ['README.md'],
+      isInitialized: true,
     });
   },
 
@@ -153,5 +156,15 @@ export const useGitStore = create<GitState & GitActions>((set, get) => ({
       });
   },
 
-  reset: () => get().init(),
+  reset: () => {
+    set({
+      nodes: [],
+      HEAD: null,
+      branches: {},
+      currentBranch: 'main',
+      staging: [],
+      workingDirectory: [],
+      isInitialized: false,
+    });
+  },
 }));

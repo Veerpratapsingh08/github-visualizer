@@ -15,6 +15,10 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "GitHub Visualizer",
   description: "Visualize your codebase like never before",
+  icons: {
+    icon: '/logo.png',
+    apple: '/logo.png',
+  },
 };
 
 export default function RootLayout({
